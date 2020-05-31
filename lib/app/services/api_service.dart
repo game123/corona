@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:coronavirus_rest_api_flutter_course/app/services/api.dart';
 
+import 'endpoint_data.dart';
+
 class APIService {
   APIService(this.api);
   final API api;
@@ -25,7 +27,7 @@ class APIService {
     throw response;
   }
 
-  Future<int> getEndpointData({
+  Future<EndpointData> getEndpointData({
     @required String accessToken,
     @required Endpoint endpoint,
   }) async {
@@ -41,9 +43,12 @@ class APIService {
         // define in static map below
         // eg. _responseJsonKeys[Endpoint.cases] = 'cases'
         final String responseJsonKey = _responseJsonKeys[endpoint];
-        final int result = endpointData[responseJsonKey];
-        if (result != null) {
-          return result;
+        // Either cases or
+        final int value = endpointData[responseJsonKey];
+        final String dataString = endpointData['date'];
+        final date = DateTime.tryParse(dataString);
+        if (value != null) {
+          return EndpointData(value: value, date: date);
         }
       }
     }
@@ -52,6 +57,8 @@ class APIService {
     throw response;
   }
 
+// Reture data type tag is different, sometimes it is 'cases'
+// And sometimes it is 'data'
   static Map<Endpoint, String> _responseJsonKeys = {
     Endpoint.cases: 'cases',
     Endpoint.casesSuspected: 'data',
